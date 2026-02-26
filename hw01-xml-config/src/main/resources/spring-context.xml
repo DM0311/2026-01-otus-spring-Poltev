@@ -19,6 +19,7 @@
 
     <bean id="testRunnerService" class="ru.otus.hw.service.TestRunnerServiceImpl">
         <constructor-arg name="testService" ref="testService"/>
+        <constructor-arg name="ioService" ref="ioService"/>
     </bean>
 
     <bean id="testFileNameProvider" class="ru.otus.hw.config.AppProperties">

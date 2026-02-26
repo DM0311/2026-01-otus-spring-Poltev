@@ -1,7 +1,7 @@
 package ru.otus.hw.service;
 
 import lombok.RequiredArgsConstructor;
-import ru.otus.hw.dao.CsvQuestionDao;
+import ru.otus.hw.dao.QuestionDao;
 import ru.otus.hw.domain.Question;
 
 import java.util.List;
@@ -11,7 +11,7 @@ public class TestServiceImpl implements TestService {
 
     private final IOService ioService;
 
-    private final CsvQuestionDao questionDao;
+    private final QuestionDao questionDao;
 
     @Override
     public void executeTest() {
@@ -19,10 +19,17 @@ public class TestServiceImpl implements TestService {
         ioService.printFormattedLine("Please answer the questions below%n");
         List<Question> questions = questionDao.findAll();
         for (Question question : questions) {
-            ioService.printFormattedLine(question.text());
-            for (int i = 0; i < question.answers().size(); i++) {
-                ioService.printFormattedLine("%d. " + question.answers().get(i).text(), i);
-            }
+            var output = toFormattedString(question);
+            ioService.printLine(output);
         }
+    }
+
+    private String toFormattedString(Question question){
+        StringBuilder builder = new StringBuilder(question.text());
+        builder.append("\r\n");
+        for (int i = 0; i < question.answers().size(); i++) {
+            builder.append(String.format("%d. %s\r\n", i,question.answers().get(i).text()));
+        }
+        return builder.toString();
     }
 }

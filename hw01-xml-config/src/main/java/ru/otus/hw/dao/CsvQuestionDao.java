@@ -43,7 +43,7 @@ public class CsvQuestionDao implements QuestionDao {
             }
             return questions;
         } catch (IOException e) {
-            throw new QuestionReadException("File not found in classpath");
+            throw new QuestionReadException("File not found in classpath",e);
         }
     }
 }
