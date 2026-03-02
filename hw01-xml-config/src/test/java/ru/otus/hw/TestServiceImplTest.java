@@ -12,7 +12,6 @@ import ru.otus.hw.domain.Question;
 import ru.otus.hw.service.IOService;
 import ru.otus.hw.service.TestServiceImpl;
 
-import java.io.IOException;
 import java.util.List;
 
 import static org.mockito.Mockito.*;
@@ -26,12 +25,12 @@ public class TestServiceImplTest {
     @Mock
     private QuestionDao questionDao;
 
-   private TestServiceImpl testService;
+    private TestServiceImpl testService;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        testService = new TestServiceImpl(ioService,questionDao);
+        testService = new TestServiceImpl(ioService, questionDao);
     }
 
     @DisplayName("Should display 2 questions with answers")
@@ -45,21 +44,21 @@ public class TestServiceImplTest {
 
         InOrder inOrder = inOrder(ioService, questionDao);
 
+        String expected1 = "Is there life on Mars?" + System.lineSeparator() +
+                "0. Science doesn't know this yet" + System.lineSeparator() +
+                "1. Certainly. The red UFO is from Mars. And green is from Venus" + System.lineSeparator() +
+                "2. Absolutely not" + System.lineSeparator();
+
+        String expected2 = "How should resources be loaded form jar in Java?" + System.lineSeparator() +
+                "0. ClassLoader#getResourceAsStream or ClassPathResource#getInputStream" + System.lineSeparator() +
+                "1. ClassLoader#geResource#getFile + FileReader" + System.lineSeparator() +
+                "2. Wingardium Leviosa" + System.lineSeparator();
+
         inOrder.verify(ioService).printLine("");
         inOrder.verify(ioService).printFormattedLine("Please answer the questions below%n");
         inOrder.verify(questionDao).findAll();
-
-        // q1
-        inOrder.verify(ioService).printFormattedLine("Is there life on Mars?");
-        inOrder.verify(ioService).printFormattedLine("%d. Science doesn't know this yet", 0);
-        inOrder.verify(ioService).printFormattedLine("%d. Certainly. The red UFO is from Mars. And green is from Venus", 1);
-        inOrder.verify(ioService).printFormattedLine("%d. Absolutely not", 2);
-
-        // q2
-        inOrder.verify(ioService).printFormattedLine("How should resources be loaded form jar in Java?");
-        inOrder.verify(ioService).printFormattedLine("%d. ClassLoader#getResourceAsStream or ClassPathResource#getInputStream", 0);
-        inOrder.verify(ioService).printFormattedLine("%d. ClassLoader#geResource#getFile + FileReader", 1);
-        inOrder.verify(ioService).printFormattedLine("%d. Wingardium Leviosa", 2);
+        inOrder.verify(ioService).printLine(expected1);
+        inOrder.verify(ioService).printLine(expected2);
 
         verifyNoMoreInteractions(ioService, questionDao);
 
@@ -67,17 +66,17 @@ public class TestServiceImplTest {
 
     private List<Question> createMockQuestions() {
 
-        var q1 = new Question("Is there life on Mars?",List.of(
-                new Answer("Science doesn't know this yet",true),
-                new Answer("Certainly. The red UFO is from Mars. And green is from Venus",false),
-                new Answer("Absolutely not",false)
+        var q1 = new Question("Is there life on Mars?", List.of(
+                new Answer("Science doesn't know this yet", true),
+                new Answer("Certainly. The red UFO is from Mars. And green is from Venus", false),
+                new Answer("Absolutely not", false)
         ));
 
-        var q2 = new Question("How should resources be loaded form jar in Java?",List.of(
-                new Answer("ClassLoader#getResourceAsStream or ClassPathResource#getInputStream",true),
-                new Answer("ClassLoader#geResource#getFile + FileReader",false),
-                new Answer("Wingardium Leviosa",false)
+        var q2 = new Question("How should resources be loaded form jar in Java?", List.of(
+                new Answer("ClassLoader#getResourceAsStream or ClassPathResource#getInputStream", true),
+                new Answer("ClassLoader#geResource#getFile + FileReader", false),
+                new Answer("Wingardium Leviosa", false)
         ));
-        return List.of(q1,q2);
+        return List.of(q1, q2);
     }
 }

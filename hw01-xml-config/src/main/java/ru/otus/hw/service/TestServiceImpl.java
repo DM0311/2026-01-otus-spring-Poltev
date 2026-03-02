@@ -24,11 +24,11 @@ public class TestServiceImpl implements TestService {
         }
     }
 
-    private String toFormattedString(Question question){
+    private String toFormattedString(Question question) {
         StringBuilder builder = new StringBuilder(question.text());
-        builder.append("\r\n");
+        builder.append(System.lineSeparator());
         for (int i = 0; i < question.answers().size(); i++) {
-            builder.append(String.format("%d. %s\r\n", i,question.answers().get(i).text()));
+            builder.append(String.format("%d. %s%n", i, question.answers().get(i).text()));
         }
         return builder.toString();
     }
