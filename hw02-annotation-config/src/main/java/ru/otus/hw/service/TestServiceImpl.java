@@ -7,6 +7,8 @@ import ru.otus.hw.domain.Question;
 import ru.otus.hw.domain.Student;
 import ru.otus.hw.domain.TestResult;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class TestServiceImpl implements TestService {
@@ -20,16 +22,7 @@ public class TestServiceImpl implements TestService {
         ioService.printLine("");
         ioService.printFormattedLine("Please answer the questions below%n");
         var questions = questionDao.findAll();
-        var testResult = new TestResult(student);
-
-        for (var question : questions) {
-            var output = toFormattedString(question);
-            ioService.printLine(output);
-            var answerNum = ioService.readIntForRange(0, question.answers().size() - 1, "Incorrect number");
-            var isAnswerValid = question.answers().get(answerNum).isCorrect();
-            testResult.applyAnswer(question, isAnswerValid);
-        }
-        return testResult;
+        return executeSurvey(questions, student);
     }
 
     private String toFormattedString(Question question) {
@@ -39,6 +32,18 @@ public class TestServiceImpl implements TestService {
             builder.append(String.format("%d. %s%n", i, question.answers().get(i).text()));
         }
         return builder.toString();
+    }
+
+    private TestResult executeSurvey(List<Question> questions, Student student) {
+        var testResult = new TestResult(student);
+        for (var question : questions) {
+            var output = toFormattedString(question);
+            ioService.printLine(output);
+            var answerNum = ioService.readIntForRange(0, question.answers().size() - 1, "Incorrect number");
+            var isAnswerValid = question.answers().get(answerNum).isCorrect();
+            testResult.applyAnswer(question, isAnswerValid);
+        }
+        return testResult;
     }
 
 }
