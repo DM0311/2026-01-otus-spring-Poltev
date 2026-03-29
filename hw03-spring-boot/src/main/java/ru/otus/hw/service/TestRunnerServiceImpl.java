@@ -13,6 +13,8 @@ public class TestRunnerServiceImpl implements TestRunnerService {
 
     private final ResultService resultService;
 
+    private final LocalizedIOService localizedIOService;
+
     @Override
     public void run() {
         try {
@@ -20,7 +22,7 @@ public class TestRunnerServiceImpl implements TestRunnerService {
             var testResult = testService.executeTestFor(student);
             resultService.showResult(testResult);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            localizedIOService.printLineLocalized("Application.execution.error");
         }
     }
 }

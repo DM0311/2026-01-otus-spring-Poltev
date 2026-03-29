@@ -32,7 +32,8 @@ public class TestServiceImpl implements TestService {
         for (var question : questions) {
             var output = toFormattedString(question);
             ioService.printLine(output);
-            var answerNum = ioService.readIntForRange(0, question.answers().size() - 1, "Incorrect number");
+            var errorMsg = ioService.getMessage("Testservice.input.incorrect.number");
+            var answerNum = ioService.readIntForRange(0, question.answers().size() - 1, errorMsg);
             var isAnswerValid = question.answers().get(answerNum).isCorrect();
             testResult.applyAnswer(question, isAnswerValid);
         }
