@@ -38,6 +38,9 @@ public class TestServiceImplTest {
 
         List<Question> mockQuestions = createMockQuestions();
         when(questionDao.findAll()).thenReturn(mockQuestions);
+        when(ioService.getMessage("Testservice.input.incorrect.number"))
+                .thenReturn("Incorrect number");
+
 
         testService.executeTestFor(new Student("Ivan", "Ivanov"));
 
@@ -53,13 +56,16 @@ public class TestServiceImplTest {
                 "1. ClassLoader#geResource#getFile + FileReader" + System.lineSeparator() +
                 "2. Wingardium Leviosa" + System.lineSeparator();
 
+
         inOrder.verify(ioService).printLine("");
         inOrder.verify(ioService).printLineLocalized("TestService.answer.the.questions");
         inOrder.verify(ioService).printLine("");
         inOrder.verify(questionDao).findAll();
         inOrder.verify(ioService).printLine(expectedQuestion1);
+        inOrder.verify(ioService).getMessage("Testservice.input.incorrect.number");
         inOrder.verify(ioService).readIntForRange(0, 2, "Incorrect number");
         inOrder.verify(ioService).printLine(expectedQuestion2);
+        inOrder.verify(ioService).getMessage("Testservice.input.incorrect.number");
         inOrder.verify(ioService).readIntForRange(0, 2, "Incorrect number");
         verifyNoMoreInteractions(ioService, questionDao);
 
