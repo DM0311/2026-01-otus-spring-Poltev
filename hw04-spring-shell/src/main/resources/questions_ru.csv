@@ -1,0 +1,6 @@
+# Добавить сюда своих вопросов. Эту строку надо пропустить при настройке CsvToBean (withSkipLines)
+Есть ли жизнь на Марсе?;Это науке пока не известно%true|Конечно. Красные (НЛО) это с Марса. А зеленые (НЛО) с Венеры%false|Точно нет%false
+Как нужно загружать ресурс из jar в Java?;ClassLoader#geResourceAsStream или ClassPathResource#getInputStream%true|ClassLoader#geResource#getFile + FileReader%false|Wingardium Leviosa%false
+Какой предпочтительный способ реакции на исключения?;@SneakyThrow%false|e.printStackTrace()%false|Проброс дальше с предварительным оборачиванием в бизнес-исключение (например, QuestionReadException)%true|Игнорирование исключения%false
+Какой механизм рекомендуется использовать для управления ресурсами, реализующими интерфейс AutoCloseable?;try-catch-finally с ручным вызовом close() в finally%false|try-with-resources (Java 7+)%true|использование finalize()%false|полагаться на сборщик мусора%false
+Как правильно использовать блок finally при работе с исключениями?;использовать finally только для закрытия ресурсов, даже если есть try-with-resources%false|размещать в finally только критически важный код, который должен выполниться независимо от возникновения исключения%true|в finally можно выбрасывать исключения, переопределяя исходное%false|блок finally не обязателен, если есть catch%false
