@@ -31,6 +31,34 @@ class JdbcBookRepositoryTest {
 
     private List<Book> dbBooks;
 
+    private static List<Author> getDbAuthors() {
+        return IntStream.range(1, 4).boxed()
+                .map(id -> new Author(id, "Author_" + id))
+                .toList();
+    }
+
+    private static List<Genre> getDbGenres() {
+        return IntStream.range(1, 7).boxed()
+                .map(id -> new Genre(id, "Genre_" + id))
+                .toList();
+    }
+
+    private static List<Book> getDbBooks(List<Author> dbAuthors, List<Genre> dbGenres) {
+        return IntStream.range(1, 4).boxed()
+                .map(id -> new Book(id,
+                        "BookTitle_" + id,
+                        dbAuthors.get(id - 1),
+                        dbGenres.subList((id - 1) * 2, (id - 1) * 2 + 2)
+                ))
+                .toList();
+    }
+
+    private static List<Book> getDbBooks() {
+        var dbAuthors = getDbAuthors();
+        var dbGenres = getDbGenres();
+        return getDbBooks(dbAuthors, dbGenres);
+    }
+
     @BeforeEach
     void setUp() {
         dbAuthors = getDbAuthors();
@@ -102,33 +130,5 @@ class JdbcBookRepositoryTest {
         assertThat(repositoryJdbc.findById(1L)).isPresent();
         repositoryJdbc.deleteById(1L);
         assertThat(repositoryJdbc.findById(1L)).isEmpty();
-    }
-
-    private static List<Author> getDbAuthors() {
-        return IntStream.range(1, 4).boxed()
-                .map(id -> new Author(id, "Author_" + id))
-                .toList();
-    }
-
-    private static List<Genre> getDbGenres() {
-        return IntStream.range(1, 7).boxed()
-                .map(id -> new Genre(id, "Genre_" + id))
-                .toList();
-    }
-
-    private static List<Book> getDbBooks(List<Author> dbAuthors, List<Genre> dbGenres) {
-        return IntStream.range(1, 4).boxed()
-                .map(id -> new Book(id,
-                        "BookTitle_" + id,
-                        dbAuthors.get(id - 1),
-                        dbGenres.subList((id - 1) * 2, (id - 1) * 2 + 2)
-                ))
-                .toList();
-    }
-
-    private static List<Book> getDbBooks() {
-        var dbAuthors = getDbAuthors();
-        var dbGenres = getDbGenres();
-        return getDbBooks(dbAuthors, dbGenres);
     }
 }

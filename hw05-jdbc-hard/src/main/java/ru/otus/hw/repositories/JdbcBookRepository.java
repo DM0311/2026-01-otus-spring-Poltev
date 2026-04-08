@@ -125,11 +125,11 @@ public class JdbcBookRepository implements BookRepository {
 
     private Book update(Book book) {
         var params = new MapSqlParameterSource()
-                .addValue("title",book.getTitle())
-                .addValue("authorId",book.getAuthor().getId())
-                .addValue("id",book.getId());
+                .addValue("title", book.getTitle())
+                .addValue("authorId", book.getAuthor().getId())
+                .addValue("id", book.getId());
         int updatedCount = jdbc.update("update books set title = :title, author_id = :authorId where id = :id", params);
-        if(updatedCount==0){
+        if (updatedCount == 0) {
             throw new EntityNotFoundException("Book with id = %d not found".formatted(book.getId()));
         }
         removeGenresRelationsFor(book);
@@ -181,7 +181,7 @@ public class JdbcBookRepository implements BookRepository {
                     String bookTitle = rs.getString("book_title");
                     long authorId = rs.getLong("author_id");
                     String authorName = rs.getString("author_name");
-                    book = new Book(bookId,bookTitle,new Author(authorId,authorName),genres);
+                    book = new Book(bookId, bookTitle, new Author(authorId, authorName), genres);
                 }
                 long genreId = rs.getLong("genre_id");
                 if (!rs.wasNull()) {
