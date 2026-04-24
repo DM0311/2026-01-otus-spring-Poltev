@@ -25,7 +25,7 @@ public class JpaBookRepository implements BookRepository {
 
     @Override
     public List<Book> findAll() {
-        EntityGraph<?> entityGraph = entityManager.getEntityGraph("book-with-author-genres-graph");
+        EntityGraph<?> entityGraph = entityManager.getEntityGraph("book-with-author-graph");
         return entityManager.createQuery("select b from Book b", Book.class)
                 .setHint("jakarta.persistence.fetchgraph", entityGraph)
                 .getResultList();
