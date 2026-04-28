@@ -7,6 +7,7 @@ import ru.otus.hw.converters.CommentConverter;
 import ru.otus.hw.dto.CommentDto;
 import ru.otus.hw.services.CommentService;
 
+import java.util.List;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -26,7 +27,12 @@ public class CommentCommands {
 
     @ShellMethod(value = "Find all comments by book ID", key = "acbbid")
     public String findAllCommentsByBookId(long bookId) {
-        return commentService.findAllByBookId(bookId)
+
+        List<CommentDto> allByBookId = commentService.findAllByBookId(bookId);
+        if(allByBookId.isEmpty()){
+            return "Comments for book with id %d not found".formatted(bookId);
+        }
+        return allByBookId
                 .stream()
                 .map(commentConverter::commentToString)
                 .collect(Collectors.joining("," + System.lineSeparator()));
