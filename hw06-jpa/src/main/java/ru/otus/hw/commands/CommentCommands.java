@@ -29,7 +29,7 @@ public class CommentCommands {
     public String findAllCommentsByBookId(long bookId) {
 
         List<CommentDto> allByBookId = commentService.findAllByBookId(bookId);
-        if(allByBookId.isEmpty()){
+        if (allByBookId.isEmpty()) {
             return "Comments for book with id %d not found".formatted(bookId);
         }
         return allByBookId
