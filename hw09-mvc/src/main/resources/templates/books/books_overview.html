@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>All books</title>
+    <style type="text/css">
+        body {
+            padding: 10px;
+        }
+
+        .books {
+            border: 1px solid;
+            width: 300px;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+        }
+
+        .books tr td, th {
+            padding: 5px;
+            border: 1px solid;
+        }
+
+<!--        .margin_bottom {-->
+<!--             min-width: 120px;-->
+<!--             margin-bottom: 5px;-->
+<!--        }-->
+
+        .action_button {
+             min-width: 120px;
+             padding: 5px 10px;
+             text-align: center;
+             margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+<h3>Книги:</h3>
+<table class="books">
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Название</th>
+        <th>Автор</th>
+        <th>Жанр</th>
+        <th>Комментарии</th>
+        <th>Действие</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="book : ${books}" th:object="${book}">
+        <td th:text="*{id}">1</td>
+        <td th:text="*{title}">Default name</td>
+        <td th:text="*{author.fullName}">Default Author</td>
+
+        <td>
+        <span th:each="genre, iterStat : *{genres}">
+            <span th:text="${genre.name}">Default genre</span><span th:if="${!iterStat.last}">, </span>
+        </span>
+        </td>
+
+        <td>
+            <a href="../comments/book_comments_overview.html" th:href="@{/comments(id=${book.id})}">
+                <button class="action_button" type="button">Комментарии</button>
+            </a>
+        </td>
+
+        <td>
+            <form method="get" style="display:inline" th:action="@{/edit_book}">
+                <input name="id" th:value="${book.id}" type="hidden"/>
+                <button class="action_button" type="submit">Редактировать</button>
+            </form>
+            <form method="post" style="display:inline" th:action="@{/delete}">
+                <input name="id" th:value="${book.id}" type="hidden"/>
+                <button class="action_button" type="submit">Удалить</button>
+            </form>
+        </td>
+    </tr>
+    </tbody>
+</table>
+<a href="edit_book.html" th:href="@{/edit_book}">
+    <button class="margin_bottom" type="button">Добавить книгу</button>
+</a>
+</body>
+</html>

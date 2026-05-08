@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>List of all comments</title>
+    <style type="text/css">
+        body {
+            padding: 10px;
+        }
+
+        .comments {
+            border: 1px solid;
+            width: 300px;
+            border-collapse: collapse;
+        }
+
+        .comments tr td, th {
+            padding: 5px;
+            border: 1px solid;
+        }
+
+        .row {
+            margin-top: 10px;
+        }
+
+        .padding-top {
+            padding-top: 8px;
+        }
+    </style>
+</head>
+<body>
+
+<h3>Книга:</h3>
+<div th:object="${book}">
+    <table>
+        <tbody>
+        <tr class="row">
+            <td>
+                <label for="book-title">Название:</label>
+            </td>
+            <td>
+                <input id="book-title" readonly="readonly" th:value="*{title}" type="text" value="Default name"/>
+            </td>
+        </tr>
+        <tr class="row">
+            <td>
+                <label for="book-author">Автор:</label>
+            </td>
+            <td>
+                <input id="book-author" readonly="readonly" th:value="*{author.fullName}" type="text"
+                       value="Default author"/>
+            </td>
+        </tr>
+        <tr class="row">
+            <td>
+                <label for="book-genre">Жанр:</label>
+            </td>
+            <td>
+                <input id="book-genre" readonly="readonly" th:value="${#lists.isEmpty(book.genres) ? '' : #strings.listJoin(book.genres.![name], ', ')}" type="text"
+                       value="Default genre"/>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <h3>Комментарии:</h3>
+    <table class="comments">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>комментарий</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="comment : ${comments}" th:object="${comment}">
+            <td th:text="${comment.id}">1</td>
+            <td th:text="${comment.text}">Default comment</td>
+        </tr>
+        </tbody>
+    </table>
+    <div class="padding-top">
+        <a href="../books/books_overview.html" th:href="@{/}">
+            <button type="button">назад к книгам</button>
+        </a>
+    </div>
+</body>
+</html>
