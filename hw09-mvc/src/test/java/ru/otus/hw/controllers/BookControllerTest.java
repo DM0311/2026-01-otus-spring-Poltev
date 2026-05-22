@@ -6,16 +6,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import ru.otus.hw.dto.AuthorDto;
-import ru.otus.hw.dto.BookDto;
-import ru.otus.hw.dto.GenreDto;
+import ru.otus.hw.dto.BookUpdateDto;
 import ru.otus.hw.services.AuthorService;
 import ru.otus.hw.services.BookService;
 import ru.otus.hw.services.CommentService;
 import ru.otus.hw.services.GenreService;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
 
 import static org.mockito.Mockito.verify;
@@ -56,41 +52,41 @@ public class BookControllerTest {
                 .andExpect(model().attributeExists("books"));
     }
 
-
     @DisplayName("Должен сохранить новую книгу")
     @Test
     void shouldAddNewBook() throws Exception {
-        BookDto book = new BookDto(null, "Test Book", new AuthorDto(1L, "Author_1"),
-                List.of(new GenreDto(1L, "Genre_1"), new GenreDto(2L, "Genre_2")));
-        Set<Long> genreIds = Set.of(1L, 2L);
+        BookUpdateDto updateDto = new BookUpdateDto(null, "Test Book", 1L, Set.of(1L, 2L));
 
         mvc.perform(post("/save")
-                        .flashAttr("book", book)
-                        .param("genreIds", "1", "2"))   // ← добавлено
+                        .flashAttr("updateDto", updateDto))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/"));
 
         verify(bookService).insert(
-                book.title(),
-                book.author().id(),
-                genreIds
+                updateDto.title(),
+                updateDto.authorId(),
+                updateDto.genreIds()
         );
     }
 
     @DisplayName("Должен обновить книгу")
     @Test
     void shouldUpdateBook() throws Exception {
-        BookDto bookUpdate = new BookDto(1L, "Test Book", new AuthorDto(1L, "Author_1"),
-                List.of(new GenreDto(1L, "Genre_1"), new GenreDto(2L, "Genre_2")));
-        Set<Long> genreIds = Set.of(1L, 2L);
-        mvc.perform(post("/update")
-                        .flashAttr("book", bookUpdate)
-                        .param("genreIds", "1", "2"))
+
+        BookUpdateDto updateDto = new BookUpdateDto(1L, "Updated Book Title", 2L, Set.of(2L, 3L));
+
+        mvc.perform(post("/save")
+                        .flashAttr("updateDto", updateDto))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/"));
-        verify(bookService).update(1L, bookUpdate.title(), bookUpdate.author().id(), genreIds);
-    }
 
+        verify(bookService).update(
+                1L,
+                updateDto.title(),
+                updateDto.authorId(),
+                updateDto.genreIds()
+        );
+    }
 
     @DisplayName("Должен удалить книгу")
     @Test

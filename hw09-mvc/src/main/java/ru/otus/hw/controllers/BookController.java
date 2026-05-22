@@ -1,5 +1,6 @@
 package ru.otus.hw.controllers;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -10,15 +11,15 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import ru.otus.hw.dto.AuthorDto;
 import ru.otus.hw.dto.BookDto;
+import ru.otus.hw.dto.BookUpdateDto;
 import ru.otus.hw.dto.GenreDto;
-import ru.otus.hw.exceptions.EntityNotFoundException;
 import ru.otus.hw.services.AuthorService;
 import ru.otus.hw.services.BookService;
 import ru.otus.hw.services.GenreService;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Controller
@@ -37,6 +38,8 @@ public class BookController {
     private static final String AUTHORS_KEY = "authors";
 
     private static final String GENRES_KEY = "genres";
+
+    private static final String UPDATE_BOOK_KEY = "updateDto";
 
     private final BookService bookService;
 
@@ -60,30 +63,25 @@ public class BookController {
         model.addAttribute(GENRES_KEY, genres);
 
         if (id == null) {
-            AuthorDto emptyAuthor = new AuthorDto(null, "");  // предположим, AuthorDto record или класс
-            List<GenreDto> emptyGenres = List.of();
-            BookDto dummy = new BookDto(null, "", emptyAuthor, emptyGenres);
-            model.addAttribute(BOOK_KEY, dummy);
+            BookUpdateDto updateDto = new BookUpdateDto(null, "", null, Set.of());
+            model.addAttribute(UPDATE_BOOK_KEY, updateDto);
         } else {
-            Optional<BookDto> bookDto = bookService.findById(id);
-            if (bookDto.isEmpty()) {
-                throw new EntityNotFoundException("Entity with id %d not found".formatted(id));
-            }
-            model.addAttribute(BOOK_KEY, bookDto.get());
+            BookDto book = bookService.findById(id);
+            BookUpdateDto updateDto = new BookUpdateDto(
+                    book.id(),
+                    book.title(),
+                    book.author().id(),
+                    book.genres().stream().map(GenreDto::id).collect(Collectors.toSet())
+            );
+            model.addAttribute(UPDATE_BOOK_KEY, updateDto);
         }
-
         return EDIT_BOOK_VIEW;
     }
 
-    @PostMapping("/update")
-    public String updateBook(@ModelAttribute("book") BookDto bookDto,
+    @PostMapping("/save")
+    public String updateBook(@Valid @ModelAttribute("updateDto") BookUpdateDto updateDto,
                              BindingResult bindingResult,
-                             @RequestParam(value = "genreIds", required = false) Set<Long> genreIds,
                              Model model) {
-        if (genreIds == null || genreIds.isEmpty()) {
-            String errorText = "Genre must not be empty";
-            bindingResult.rejectValue("genres", "", errorText);
-        }
         if (bindingResult.hasErrors()) {
             List<AuthorDto> authors = authorService.findAll();
             List<GenreDto> genres = genreService.findAll();
@@ -93,21 +91,11 @@ public class BookController {
             return EDIT_BOOK_VIEW;
         }
 
-        bookService.update(bookDto.id(), bookDto.title(), bookDto.author().id(), genreIds);
-        return REDIRECT_TO_ROOT;
-    }
-
-    @PostMapping("/save")
-    public String saveBook(@ModelAttribute("book") BookDto bookDto,
-                           BindingResult bindingResult,
-                           @RequestParam(value = "genreIds", required = false) Set<Long> genreIds,
-                           Model model) {
-        if (bindingResult.hasErrors()) {
-            model.addAttribute(AUTHORS_KEY, authorService.findAll());
-            model.addAttribute(GENRES_KEY, genreService.findAll());
-            return EDIT_BOOK_VIEW;
+        if (updateDto.id() == null) {
+            bookService.insert(updateDto.title(), updateDto.authorId(), updateDto.genreIds());
+        } else {
+            bookService.update(updateDto.id(), updateDto.title(), updateDto.authorId(), updateDto.genreIds());
         }
-        bookService.insert(bookDto.title(), bookDto.author().id(), genreIds);
         return REDIRECT_TO_ROOT;
     }
 

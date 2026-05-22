@@ -30,13 +30,10 @@ public class CommentController {
 
     @GetMapping("/comments")
     public String getComments(@RequestParam("id") long id, Model model) {
-        Optional<BookDto> bookDto = bookService.findById(id);
-        if (bookDto.isEmpty()) {
-            throw new EntityNotFoundException("Entity with id %d not found".formatted(id));
-        }
+        BookDto bookDto = bookService.findById(id);
         List<CommentDto> comments = commentService.findAllByBookId(id);
         model.addAttribute(COMMENTS_KEY, comments);
-        model.addAttribute(BOOK_KEY, bookDto.get());
+        model.addAttribute(BOOK_KEY, bookDto);
         return COMMENTS_VIEW_FORM;
     }
 

@@ -20,53 +20,57 @@
         .row {
             margin-top: 10px;
         }
+
+        .error {
+            color: red;
+            font-size: 0.8em;
+            margin-left: 105px;
+            margin-top: 5px;
+        }
     </style>
 </head>
 <body>
 
-<!-- Book edition -->
-<form action="edit_book.html" id="edit-form"
-      method="post"
-      th:action="${book.id == null} ? @{/save} : @{/update(id=${book.id})}"
-      th:object="${book}">
-    <!--      th:action="@{/edit(id=${book.id})}"-->
-
+<form id="edit-form" method="post" th:action="@{/save}" th:object="${updateDto}">
 
     <h3>Информация о книге:</h3>
 
     <div th:if="*{id} != null">
         <label for="id-input">ID:</label>
-        <input id="id-input" readonly="readonly" th:value="*{id}" type="text" value="1"/>
+        <input id="id-input" readonly="readonly" th:field="*{id}" type="text"/>
     </div>
 
     <div>
         <label for="book-title-input">Название:</label>
-        <input id="book-title-input" name="title" th:value="*{title}" type="text" value="Default Title"/>
+        <input id="book-title-input" th:field="*{title}" type="text"/>
+        <div class="error" th:errors="*{title}"></div>
     </div>
 
     <div>
         <label for="author-select">Автор:</label>
-        <select id="author-select" th:field="*{author.id}">
+        <select id="author-select" th:field="*{authorId}">
             <option th:each="a : ${authors}"
                     th:text="${a.fullName}"
                     th:value="${a.id}">
             </option>
         </select>
+        <div class="error" th:errors="*{authorId}"></div>
     </div>
+
     <div>
-        <label for="genre-select">Genres:</label>
-        <select id="genre-select" multiple name="genreIds">
+        <label for="genre-select">Жанры:</label>
+        <select id="genre-select" multiple th:field="*{genreIds}">
             <option th:each="g : ${genres}"
-                    th:selected="${book.genres != null && book.genres.![id].contains(g.id)}"
                     th:text="${g.name}"
                     th:value="${g.id}">
             </option>
         </select>
-        <div class="errors" th:errors="*{genres}" th:if="${#fields.hasErrors('genres')}"></div>
+        <div class="error" th:errors="*{genreIds}"></div>
     </div>
+
     <div class="row">
         <button type="submit">Сохранить</button>
-        <a href="books_overview.html" th:href="@{/}">
+        <a th:href="@{/}">
             <button type="button">Отмена</button>
         </a>
     </div>

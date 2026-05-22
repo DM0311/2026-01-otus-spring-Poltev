@@ -21,7 +21,7 @@ public class BookServiceTest {
     @Test
     @DisplayName("Должен возвращать книгe с автором и жанрами")
     void shouldReturnBookById() {
-        BookDto book = bookService.findById(1L).orElseThrow();
+        BookDto book = bookService.findById(1L);
 
         assertThatCode(() -> {
             assertThat(book.id()).isPositive();
@@ -91,7 +91,7 @@ public class BookServiceTest {
     @Test
     @DisplayName("Должен обновлять книгу по ID")
     void shouldUpdateBook() {
-        BookDto oldBook = bookService.findById(1L).orElseThrow();
+        BookDto oldBook = bookService.findById(1L);
         BookDto updated = bookService.update(oldBook.id(),
                 "New test Title",
                 oldBook.author().id(),
