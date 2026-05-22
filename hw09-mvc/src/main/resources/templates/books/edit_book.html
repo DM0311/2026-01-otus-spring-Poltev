@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Edit book</title>
+    <style type="text/css">
+        body {
+            padding: 10px;
+        }
+
+        label {
+            display: inline-block;
+            width: 100px;
+        }
+
+        input:read-only {
+            background: lightgray;
+        }
+
+        .row {
+            margin-top: 10px;
+        }
+
+        .error {
+            color: red;
+            font-size: 0.8em;
+            margin-left: 105px;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+
+<form id="edit-form" method="post" th:action="@{/save}" th:object="${updateDto}">
+
+    <h3>Информация о книге:</h3>
+
+    <div th:if="*{id} != null">
+        <label for="id-input">ID:</label>
+        <input id="id-input" readonly="readonly" th:field="*{id}" type="text"/>
+    </div>
+
+    <div>
+        <label for="book-title-input">Название:</label>
+        <input id="book-title-input" th:field="*{title}" type="text"/>
+        <div class="error" th:errors="*{title}"></div>
+    </div>
+
+    <div>
+        <label for="author-select">Автор:</label>
+        <select id="author-select" th:field="*{authorId}">
+            <option th:each="a : ${authors}"
+                    th:text="${a.fullName}"
+                    th:value="${a.id}">
+            </option>
+        </select>
+        <div class="error" th:errors="*{authorId}"></div>
+    </div>
+
+    <div>
+        <label for="genre-select">Жанры:</label>
+        <select id="genre-select" multiple th:field="*{genreIds}">
+            <option th:each="g : ${genres}"
+                    th:text="${g.name}"
+                    th:value="${g.id}">
+            </option>
+        </select>
+        <div class="error" th:errors="*{genreIds}"></div>
+    </div>
+
+    <div class="row">
+        <button type="submit">Сохранить</button>
+        <a th:href="@{/}">
+            <button type="button">Отмена</button>
+        </a>
+    </div>
+</form>
+
+</body>
+</html>
