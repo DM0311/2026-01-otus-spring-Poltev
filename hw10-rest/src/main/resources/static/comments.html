@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <title>List of all comments</title>
+    <style type="text/css">
+        body {
+            padding: 10px;
+        }
+
+        .comments {
+            border: 1px solid;
+            width: 300px;
+            border-collapse: collapse;
+        }
+
+        .comments tr td, th {
+            padding: 5px;
+            border: 1px solid;
+        }
+
+        .row {
+            margin-top: 10px;
+        }
+
+        .padding-top {
+            padding-top: 8px;
+        }
+    </style>
+</head>
+<body>
+
+<h3>Книга:</h3>
+<div id="book-info">
+    <table>
+        <tbody>
+        <tr class="row">
+            <td>
+                <label for="book-title">Название:</label>
+            </td>
+            <td>
+                <input id="book-title" readonly="readonly" type="text" value="Default name"/>
+            </td>
+        </tr>
+        <tr class="row">
+            <td>
+                <label for="book-author">Автор:</label>
+            </td>
+            <td>
+                <input id="book-author" readonly="readonly" type="text" value="Default author"/>
+            </td>
+        </tr>
+        <tr class="row">
+            <td>
+                <label for="book-genre">Жанр:</label>
+            </td>
+            <td>
+                <input id="book-genre" readonly="readonly" type="text" value="Default genre"/>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+<h3>Комментарии:</h3>
+<table class="comments">
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>комментарий</th>
+    </tr>
+    </thead>
+    <tbody id="comments-body">
+    </tbody>
+</table>
+<div class="padding-top">
+    <a href="/">
+        <button type="button">назад к книгам</button>
+    </a>
+</div>
+</body>
+<script>
+
+    const bookId = new URLSearchParams(window.location.search).get('id');
+
+    fetch(`/api/book/${bookId}`)
+        .then(response => response.json())
+        .then(book => {
+                document.getElementById('book-title').value = book.title;
+                document.getElementById('book-author').value = book.author.fullName;
+                const genresText = book.genres && book.genres.length > 0
+                    ? book.genres.map(g => g.name).join(', ')
+                    : '';
+                document.getElementById('book-genre').value = genresText;
+        });
+
+
+    fetch(`/api/book/${bookId}/comment`)
+        .then(response => response.json())
+        .then(comments => {
+            const tbody = document.getElementById('comments-body');
+            comments.forEach(comment => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${comment.id}</td>
+                        <td>${comment.text}</td>
+                    </tr>
+                `;
+            });
+        });
+</script>
+</html>
