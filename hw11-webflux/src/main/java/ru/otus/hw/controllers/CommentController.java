@@ -1,0 +1,22 @@
+package ru.otus.hw.controllers;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RestController;
+import reactor.core.publisher.Flux;
+import ru.otus.hw.dto.CommentDto;
+import ru.otus.hw.services.CommentService;
+
+@RequiredArgsConstructor
+@RestController
+public class CommentController {
+
+    private final CommentService commentService;
+
+    @GetMapping("/api/book/{id}/comment")
+    public Flux<CommentDto> getComments(@PathVariable("id") long id) {
+        return commentService.findAllByBookId(id);
+    }
+
+}
