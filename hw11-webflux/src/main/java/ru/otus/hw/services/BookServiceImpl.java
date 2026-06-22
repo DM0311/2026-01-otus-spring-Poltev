@@ -1,7 +1,6 @@
 package ru.otus.hw.services;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.r2dbc.core.DatabaseClient;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
@@ -14,7 +13,6 @@ import ru.otus.hw.models.Book;
 import ru.otus.hw.models.Genre;
 import ru.otus.hw.repositories.AuthorRepository;
 import ru.otus.hw.repositories.BookRepository;
-import ru.otus.hw.repositories.BookRepositoryCustom;
 import ru.otus.hw.repositories.GenreRepository;
 
 import java.util.List;
@@ -30,16 +28,12 @@ public class BookServiceImpl implements BookService {
 
     private final BookRepository bookRepository;
 
-    private final BookRepositoryCustom bookRepositoryCustom;
-
-    private final DatabaseClient databaseClient;
-
     private final BookMapper bookMapper;
 
     @Override
     @Transactional(readOnly = true)
     public Mono<BookDto> findById(long id) {
-        return bookRepositoryCustom.findById(id)
+        return bookRepository.findBookEntityById(id).map(bookMapper::mapToDto)
                 .switchIfEmpty(Mono.error(
                         new EntityNotFoundException("Books with id=%d not found!".formatted(id))));
     }
@@ -47,19 +41,19 @@ public class BookServiceImpl implements BookService {
     @Override
     @Transactional(readOnly = true)
     public Flux<BookDto> findAll() {
-        return bookRepositoryCustom.findAll();
+        return bookRepository.findAllBookEntities().map(bookMapper::mapToDto);
     }
 
     @Override
     @Transactional
     public Mono<BookDto> insert(String title, long authorId, Set<Long> genresIds) {
-        return save(0L, title, authorId, genresIds);
+        return save(0L, title, authorId, genresIds).map(bookMapper::mapToDto);
     }
 
     @Override
     @Transactional
     public Mono<BookDto> update(long id, String title, long authorId, Set<Long> genresIds) {
-        return save(id, title, authorId, genresIds);
+        return save(id, title, authorId, genresIds).map(bookMapper::mapToDto);
     }
 
     @Override
@@ -68,61 +62,29 @@ public class BookServiceImpl implements BookService {
         return bookRepository.deleteById(id);
     }
 
-    private Mono<BookDto> save(long id, String title, long authorId, Set<Long> genresIds) {
+    private Mono<Book> save(Long id, String title, long authorId, Set<Long> genresIds) {
 
-        boolean isNewBook = (id == 0L);
+        Mono<Author> authorMono = getAuthorById(authorId);
 
-        Mono<Author> authorMono = authorRepository.findById(authorId)
-                .switchIfEmpty(Mono.error(new EntityNotFoundException("Author not found: " + authorId)));
+        Mono<List<Genre>> genresListMono = getGenresByIds(genresIds);
 
-        Mono<List<Genre>> genresListMono = genreRepository.findAllByIdIn(genresIds)
+        return Mono.zip(authorMono, genresListMono)
+                .map(tuple -> new Book(id, title, tuple.getT1(), tuple.getT2()))
+                .flatMap(book -> id == 0L
+                        ? bookRepository.saveBookEntity(book)
+                        : bookRepository.updateBookEntity(book));
+    }
+
+    private Mono<List<Genre>> getGenresByIds(Set<Long> genresIds) {
+        return genreRepository.findAllByIdIn(genresIds)
                 .collectList()
                 .filter(genres -> !genres.isEmpty())
                 .switchIfEmpty(Mono.error(new EntityNotFoundException("Genres not found!")));
-
-        return Mono.zip(authorMono, genresListMono)
-                .flatMap(tuple -> {
-                    Book book = new Book(id, title, authorId);
-                    return bookRepository.save(book)
-                            .flatMap(savedBook ->
-                                    updateBookGenresLinkTable(savedBook.getId(), tuple.getT2(), isNewBook)
-                                            .thenReturn(savedBook)
-                            )
-                            .map(savedBook -> bookMapper.mapToDto(savedBook, tuple.getT1(), tuple.getT2()));
-                });
     }
 
-    private Mono<Void> updateBookGenresLinkTable(long bookId, List<Genre> genres, boolean isNewBook) {
-        if (isNewBook) {
-            return addBooksGenres(bookId, genres);
-        } else {
-            return updateBooksGenres(bookId, genres);
-        }
-    }
-
-    private Mono<Void> addBooksGenres(long bookId, List<Genre> genres) {
-        return Flux.fromIterable(genres)
-                .flatMap(genre ->
-                        databaseClient.sql("INSERT INTO books_genres (book_id, genre_id) VALUES ($1, $2)")
-                                .bind("$1", bookId)
-                                .bind("$2", genre.getId())
-                                .then()
-                )
-                .then();
-    }
-
-    private Mono<Void> updateBooksGenres(long bookId, List<Genre> genres) {
-        return databaseClient.sql("DELETE FROM books_genres WHERE book_id = $1")
-                .bind("$1", bookId)
-                .then()
-                .thenMany(Flux.fromIterable(genres))
-                .flatMap(genre ->
-                        databaseClient.sql("INSERT INTO books_genres (book_id, genre_id) VALUES ($1, $2)")
-                                .bind("$1", bookId)
-                                .bind("$2", genre.getId())
-                                .then()
-                )
-                .then();
+    private Mono<Author> getAuthorById(long authorId) {
+        return authorRepository.findById(authorId)
+                .switchIfEmpty(Mono.error(new EntityNotFoundException("Author not found: " + authorId)));
     }
 }
 

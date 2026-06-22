@@ -17,12 +17,13 @@ public class Comment {
     private final String commentText;
 
     @NotNull
-    private final Long bookId;
+    private final Book book;
 
     @PersistenceCreator
-    public Comment(Long id, @NotNull String commentText, @NotNull Long bookId) {
+
+    public Comment(long id, String commentText, Book book) {
         this.id = id;
         this.commentText = commentText;
-        this.bookId = bookId;
+        this.book = book;
     }
 }

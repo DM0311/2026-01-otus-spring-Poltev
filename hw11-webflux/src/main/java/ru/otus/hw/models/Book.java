@@ -7,6 +7,8 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.PersistenceCreator;
 import org.springframework.data.relational.core.mapping.Table;
 
+import java.util.List;
+
 @Table(name = "books")
 @Getter
 public class Book {
@@ -18,12 +20,16 @@ public class Book {
     private final String title;
 
     @NotNull
-    private final Long authorId;
+    private final Author author;
+
+    private final List<Genre> genres;
 
     @PersistenceCreator
-    public Book(Long id, @NotNull String title, @NotNull Long authorId) {
+
+    public Book(long id, String title, Author author, List<Genre> genres) {
         this.id = id;
         this.title = title;
-        this.authorId = authorId;
+        this.author = author;
+        this.genres = genres;
     }
 }

@@ -25,32 +25,40 @@ public class CommentServiceImpl implements CommentService {
     @Transactional(readOnly = true)
     @Override
     public Mono<CommentDto> findById(long id) {
-        return commentRepository.findById(id).map(commentMapper::mapToDto);
+        return commentRepository.findCommentEntityById(id).map(commentMapper::mapToDto);
     }
 
     @Transactional(readOnly = true)
     @Override
     public Flux<CommentDto> findAllByBookId(long bookId) {
-        return commentRepository.findAllByBookId(bookId).map(commentMapper::mapToDto);
+        return commentRepository.findCommentEntityByBookId(bookId).map(commentMapper::mapToDto);
     }
 
     @Transactional
     @Override
     public Mono<CommentDto> save(String text, long bookId) {
-        return bookRepository.findById(bookId)
-                .switchIfEmpty(Mono.error(() ->
-                        new EntityNotFoundException("Book with id %d not found".formatted(bookId))))
-                .flatMap(book -> {
-                    Comment comment = new Comment(0L, text, bookId);
-                    return commentRepository.save(comment);
-                })
-                .map(commentMapper::mapToDto);
+        return update(0L, text, bookId);
     }
 
     @Transactional
     @Override
     public Mono<CommentDto> update(long id, String text, long bookId) {
-        return commentRepository.save(new Comment(id, text, bookId))
+        return bookRepository.findBookEntityById(bookId)
+                .switchIfEmpty(Mono.error(() ->
+                        new EntityNotFoundException("Book with id %d not found".formatted(bookId))))
+                .flatMap(book -> {
+                    Comment comment = new Comment(id, text, book);
+                    if (id == 0L) {
+                        return commentRepository.saveCommentEntity(comment);
+                    } else {
+                        return commentRepository.findCommentEntityById(id)
+                                .switchIfEmpty(Mono.error(() ->
+                                        new EntityNotFoundException("Comment with id %d not found".formatted(id))))
+                                .flatMap(existing -> {
+                                    return commentRepository.updateCommentEntity(comment);
+                                });
+                    }
+                })
                 .map(commentMapper::mapToDto);
     }
 
