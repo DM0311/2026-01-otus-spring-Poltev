@@ -2,7 +2,6 @@ package ru.otus.hw.configuration;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -23,17 +22,10 @@ public class SecurityConfiguration {
                 .sessionManagement((httpSecuritySessionManagementConfigurer ->
                         httpSecuritySessionManagementConfigurer.sessionCreationPolicy(SessionCreationPolicy.ALWAYS)))
                 .authorizeHttpRequests(authorize -> authorize
-//                            .requestMatchers("/").permitAll()
                                 .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
                         .defaultSuccessUrl("/", true))
-//                    .formLogin(form -> form
-//                            .loginPage("/login.html")
-//                            .loginProcessingUrl("/login")
-//                            .defaultSuccessUrl("/index.html", true)
-//                            .permitAll()
-//                    )
                 .logout(logout -> logout
                         .logoutSuccessUrl("/login.html?logout")
                         .permitAll()
