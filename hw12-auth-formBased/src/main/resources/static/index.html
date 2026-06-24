@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <title>All books</title>
+    <style type="text/css">
+        body { padding: 10px; }
+        .books, .books td, .books th {
+            border: 1px solid black;
+            border-collapse: collapse;
+            padding: 5px;
+        }
+        button { min-width: 120px; padding: 5px; margin: 2px; }
+    </style>
+</head>
+<body>
+
+<h3>Книги:</h3>
+
+<table class="books">
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Название</th>
+        <th>Автор</th>
+        <th>Жанры</th>
+        <th>Комментарии</th>
+        <th>Действие</th>
+    </tr>
+    </thead>
+    <tbody></tbody>
+</table>
+
+<a href="/edit.html"><button>Добавить книгу</button></a>
+<a href="/authors.html"><button>Авторы</button></a>
+<a href="/genres.html"><button>Жанры</button></a>
+<script>
+    fetch('/api/book')
+        .then(response => response.json())
+        .then(books => {
+            const tbody = document.querySelector('tbody');
+            books.forEach(book => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${book.id}</td>
+                        <td>${book.title}</td>
+                        <td>${book.author.fullName}</td>
+                        <td>${book.genres.map(g => g.name).join(', ')}</td>
+                        <td>
+                        <a href="/comments.html?id=${book.id}"><button>Комментарии</button></a>
+                        </td>
+                        <td>
+                            <a href="/edit.html?id=${book.id}"><button>Редактировать</button></a>
+                            <button onclick="deleteBook(${book.id})">Удалить</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        });
+
+    function deleteBook(id) {
+            fetch('/api/book/' + id, { method: 'DELETE' })
+                .then(() => location.reload());
+    }
+</script>
+</body>
+</html>

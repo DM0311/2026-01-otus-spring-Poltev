@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Edit book</title>
+    <style type="text/css">
+        body {
+            padding: 10px;
+        }
+
+        label {
+            display: inline-block;
+            width: 100px;
+        }
+
+        input:read-only {
+            background: lightgray;
+        }
+
+        .row {
+            margin-top: 10px;
+        }
+
+        .error {
+            color: red;
+            font-size: 0.8em;
+            margin-left: 105px;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+
+<form id="edit-form" method="post">
+
+    <h3>Информация о книге:</h3>
+
+    <div id="id-container" style="display: none;">
+        <label>ID:</label>
+        <input id="id-input" readonly type="text"/>
+    </div>
+
+    <div>
+        <label for="title-input">Название:</label>
+        <input id="title-input" type="text"/>
+    </div>
+
+    <div>
+        <label for="author-select">Автор:</label>
+        <select id="author-select"></select>
+    </div>
+
+    <div>
+        <label for="genre-select">Жанры:</label>
+        <select id="genre-select" multiple></select>
+    </div>
+
+    <div>
+        <button type="submit">Сохранить</button>
+        <a href="/"><button type="button">Отмена</button></a>
+    </div>
+</form>
+<script>
+    window.onload = function() {
+        const bookId = new URLSearchParams(location.search).get('id');
+
+        fetch('/api/author')
+        .then(r => r.json())
+        .then(data => {
+            const select = document.getElementById('author-select');
+            data.forEach(a => {
+                select.innerHTML += `<option value="${a.id}">${a.fullName}</option>`;
+            });
+        });
+
+        fetch('/api/genre')
+        .then(r => r.json())
+        .then(data => {
+            const select = document.getElementById('genre-select');
+            data.forEach(g => {
+                select.innerHTML += `<option value="${g.id}">${g.name}</option>`;
+            });
+        });
+
+        if (bookId) {
+            document.getElementById('id-container').style.display = 'block';
+            fetch(`/api/book/${bookId}`)
+            .then(r => r.json())
+            .then(book => {
+                document.getElementById('id-input').value = book.id;
+                document.getElementById('title-input').value = book.title;
+                document.getElementById('author-select').value = book.author.id;
+                const genreIds = book.genres.map(g => g.id);
+                Array.from(document.getElementById('genre-select').options).forEach(opt => {
+                    opt.selected = genreIds.includes(Number(opt.value));
+                });
+            });
+        }
+
+        document.getElementById('edit-form').onsubmit = (e) => {
+            e.preventDefault();
+            const data = {
+                title: document.getElementById('title-input').value,
+                authorId: Number(document.getElementById('author-select').value),
+                genreIds: Array.from(document.getElementById('genre-select').selectedOptions).map(o => Number(o.value))
+            };
+            const url = bookId ? `/api/book/${bookId}` : '/api/book';
+            const method = bookId ? 'PUT' : 'POST';
+            fetch(url, { method, headers: {'Content-Type': 'application/json'}, body: JSON.stringify(data) })
+                .then(() => location.href = '/');
+        };
+    };
+</script>
+</body>
+</html>
