@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <title>All authors</title>
+    <style type="text/css">
+        body {
+            padding: 10px;
+        }
+
+        .authors {
+            border: 1px solid;
+            width: 300px;
+            border-collapse: collapse;
+        }
+
+        .authors tr td, th {
+            padding: 5px;
+            border: 1px solid;
+        }
+
+        .padding-top {
+            padding-top: 8px;
+        }
+    </style>
+</head>
+<body>
+<h3>Авторы:</h3>
+
+<table class="authors">
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Автор</th>
+    </tr>
+    </thead>
+    <tbody></tbody>
+</table>
+<div class="padding-top">
+    <a href="/">
+        <button type="button">назад к книгам</button>
+    </a>
+</div>
+
+<script>
+    fetch('/api/author')
+        .then(response => response.json())
+        .then(authors => {
+            const tbody = document.querySelector('tbody');
+            authors.forEach(author => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${author.id}</td>
+                        <td>${author.fullName}</td>
+                    </tr>
+                `;
+            });
+        });
+</script>
+</body>
+</html>
