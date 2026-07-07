@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <title>All genres</title>
+    <style type="text/css">
+        body {
+            padding: 10px;
+        }
+
+        .genres {
+            border: 1px solid;
+            width: 300px;
+            border-collapse: collapse;
+        }
+
+        .genres tr td, th {
+            padding: 5px;
+            border: 1px solid;
+        }
+
+        .padding-top {
+            padding-top: 8px;
+        }
+    </style>
+</head>
+<body>
+<h3>Жанры:</h3>
+
+<table class="genres">
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Жанр</th>
+    </tr>
+    </thead>
+    <tbody>
+    </tbody>
+</table>
+<div class="padding-top">
+    <a href="/">
+        <button type="button">назад к книгам</button>
+    </a>
+</div>
+<script>
+    fetch('/api/genre')
+        .then(response => response.json())
+        .then(genres => {
+            const tbody = document.querySelector('tbody');
+            genres.forEach(genre => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${genre.id}</td>
+                        <td>${genre.name}</td>
+                    </tr>
+                `;
+            });
+        });
+</script>
+</body>
+</html>
